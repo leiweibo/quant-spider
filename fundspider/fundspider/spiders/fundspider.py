@@ -30,7 +30,7 @@ class fundspider(scrapy.Spider):
             array = response.split(',')
             print(array[0] + array[1])
             dt = datetime.now()
-            targetFundNetValueUrl = f'http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code=110022&sdate=2004-01-01&edate={dt.strftime("%Y-%m-%d")}&per=20&page=10'
+            targetFundNetValueUrl = f'http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code=110022&sdate=2004-01-01&edate={dt.strftime("%Y-%m-%d")}&per=20&page=1'
             yield scrapy.Request(targetFundNetValueUrl, self.parseHistoryNetvalue)
 
         
@@ -44,21 +44,20 @@ class fundspider(scrapy.Spider):
         soup = BeautifulSoup(rawResponse, 'html.parser')
         fundNetvalues = []
         for row in soup.findAll("tbody")[0].findAll('tr'):
-           
+            row_records = []
             for record in row.findAll('td'):
-                row_records = []
                 val = record.contents
                 # 处理空值
                 if val == []:
-                    # row_records.append(np.nan)
                     row_records.append('---')
                 else:
-                    print(type(val[0]))
                     row_records.append(val[0])
+            print(f'{row_records[1]}    {row_records[2]}')
             fundNetvalues.append(row_records)
-                
-            print(fundNetvalues)
-        
-
-
-
+        pages = re.findall('pages:(\d*)', rawResponse)[0]
+        curpage = re.findall('curpage:(\d*)', rawResponse)[0]
+        print(f'{pages}  {curpage}')
+        if (int(curpage) < int(pages)):
+            dt = datetime.now()
+            targetFundNetValueUrl = f'http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code=110022&sdate=2004-01-01&edate={dt.strftime("%Y-%m-%d")}&per=20&page={int(curpage) + 1}'
+            yield scrapy.Request(targetFundNetValueUrl, self.parseHistoryNetvalue)
