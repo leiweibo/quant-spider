@@ -4,6 +4,7 @@ from fundspider.items import FundspiderItem
 import json
 import re
 from datetime import datetime
+from bs4 import BeautifulSoup
 
 class fundspider(scrapy.Spider):
     name = 'fund-spider'
@@ -11,7 +12,7 @@ class fundspider(scrapy.Spider):
     allowed_domains = ["www.eastmoney.com/", "fund.eastmoney.com"]
     start_urls = [
         # 'http://fund.eastmoney.com/js/fundcode_search.js'
-        f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=zzf&st=desc&pi=1&pn=100&dx=1'
+        f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=qdii&rs=&gs=0&sc=zzf&st=desc&pi=1&pn=100&dx=1'
     ]
 
 
@@ -29,18 +30,35 @@ class fundspider(scrapy.Spider):
             array = response.split(',')
             print(array[0] + array[1])
             dt = datetime.now()
-            # targetFundNetValueUrl = f'http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code=110022&sdate=2004-01-01&edate={dt.strftime("%Y-%m-%d")}&per=20&page=10'
-            # yield scrapy.Request(targetFundNetValueUrl, self.parseHistoryNetvalue)
+            targetFundNetValueUrl = f'http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code=110022&sdate=2004-01-01&edate={dt.strftime("%Y-%m-%d")}&per=20&page=10'
+            yield scrapy.Request(targetFundNetValueUrl, self.parseHistoryNetvalue)
 
         
-        if (int(currentPage) < int(allpages)):
-            targetFundListUrl = f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=zzf&st=desc&pi={int(currentPage) + 1}&pn=100&dx=1'
-            print(f'最终的target: {targetFundListUrl}')
-            yield scrapy.Request(targetFundListUrl, self.parse)
+        # if (int(currentPage) < int(allpages)):
+        #     targetFundListUrl = f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=qdii&rs=&gs=0&sc=zzf&st=desc&pi={int(currentPage) + 1}&pn=100&dx=1'
+        #     print(f'最终的target: {targetFundListUrl}')
+        #     yield scrapy.Request(targetFundListUrl, self.parse)
     
     def parseHistoryNetvalue(self, response):
         rawResponse = response.text
-        print(f'-------------{rawResponse}')
+        soup = BeautifulSoup(rawResponse, 'html.parser')
+        fundNetvalues = []
+        for row in soup.findAll("tbody")[0].findAll('tr'):
+           
+            for record in row.findAll('td'):
+                row_records = []
+                val = record.contents
+                # 处理空值
+                if val == []:
+                    # row_records.append(np.nan)
+                    row_records.append('---')
+                else:
+                    print(type(val[0]))
+                    row_records.append(val[0])
+            fundNetvalues.append(row_records)
+                
+            print(fundNetvalues)
         
-        
+
+
 
