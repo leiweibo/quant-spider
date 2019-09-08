@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8b35dd4054f39afd17d5f38c5db42ea9cf71f0e525f3636458cbb1af9ffe4167"
+            "sha256": "1b65e26cb8e01f9809c209453dbf6269a417c11f5dd5cbf6e5a1a6c36c6afa79"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -246,6 +246,9 @@
                 "sha256:a5a6166b4767725fd52ae55fee8c8b6137d9a51e9f1edea461a062a759160118"
             ],
             "version": "==1.9.3"
+        },
+        "taos": {
+            "path": "/home/weibolei/Dev/TDengine/src/connector/python/linux/python3"
         },
         "twisted": {
             "hashes": [

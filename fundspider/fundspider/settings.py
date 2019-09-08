@@ -23,6 +23,9 @@ COOKIES_ENABLED = False
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
+ITEM_PIPELINES = {
+    'fundspider.pipelines.FundspiderPipelineByTDEngine': 300,
+}
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32

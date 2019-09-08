@@ -12,7 +12,7 @@ class fundspider(scrapy.Spider):
     allowed_domains = ["www.eastmoney.com/", "fund.eastmoney.com"]
     start_urls = [
         # 'http://fund.eastmoney.com/js/fundcode_search.js'
-        f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=bb&rs=&gs=0&sc=zzf&st=desc&pi=1&pn=3&dx=1'
+        f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=zzf&st=desc&pi=1&pn=3&dx=1'
     ]
 
 
@@ -40,7 +40,7 @@ class fundspider(scrapy.Spider):
 
         
         if (int(currentPage) < int(allpages)):
-            targetFundListUrl = f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=qdii&rs=&gs=0&sc=zzf&st=desc&pi={int(currentPage) + 1}&pn=100&dx=1'
+            targetFundListUrl = f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft={self.fundtype}&rs=&gs=0&sc=zzf&st=desc&pi={int(currentPage) + 1}&pn=100&dx=1'
             print(f'最终的target: {targetFundListUrl}')
             yield scrapy.Request(targetFundListUrl, self.parse)
     
@@ -66,7 +66,7 @@ class fundspider(scrapy.Spider):
             # print(f'{row_records[1]}    {row_records[2]}')
 
             
-        pages = int(re.findall('pages:(\d*)', rawResponse)[0])
+        pages = min(1, int(re.findall('pages:(\d*)', rawResponse)[0]))
         curpage = int(re.findall('curpage:(\d*)', rawResponse)[0])
         if (int(curpage) < int(pages)):
             dt = datetime.now()
