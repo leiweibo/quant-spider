@@ -30,7 +30,7 @@ class fundspider(scrapy.Spider):
             array = response.split(',')
             dt = datetime.now()
             targetFundNetValueUrl = f'http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code={array[0]}&sdate=2004-01-01&edate={dt.strftime("%Y-%m-%d")}&per=20&page=1'
-            item = FundspiderItem(symbol=array[0], name=array[1])
+            item = FundspiderItem(fund_symbol=array[0], name=array[1])
             yield item
             request = scrapy.FormRequest(targetFundNetValueUrl, self.parseHistoryNetvalue)
             request.meta['fund_code'] = array[0]
@@ -61,7 +61,7 @@ class fundspider(scrapy.Spider):
                     row_records.append('---')
                 else:
                     row_records.append(val[0])
-            item = FundNetValueItem(symbol = fund_code, fund_date = row_records[0], fund_net_value=row_records[1], fund_accu_net_value=row_records[2], redemption_status = row_records[5], subscription_status = row_records[4])
+            item = FundNetValueItem(fund_symbol = fund_code, fund_date = row_records[0], fund_net_value=row_records[1], fund_accu_net_value=row_records[2], redemption_status = row_records[5], subscription_status = row_records[4])
             yield item
             # print(f'{row_records[1]}    {row_records[2]}')
 

@@ -10,7 +10,7 @@ import scrapy
 
 class FundspiderItem(scrapy.Item):
     # 基金代码
-    symbol = scrapy.Field()
+    fund_symbol = scrapy.Field()
     # 基金简称
     name = scrapy.Field()
 
@@ -18,7 +18,7 @@ class FundspiderItem(scrapy.Item):
     subscription_fee = scrapy.Field()
 
 class FundNetValueItem(scrapy.Item):
-    symbol = scrapy.Field()
+    fund_symbol = scrapy.Field()
     # 净值日期
     fund_date = scrapy.Field()
     # 当日净值
