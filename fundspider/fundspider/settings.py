@@ -14,6 +14,9 @@ BOT_NAME = 'fundspider'
 SPIDER_MODULES = ['fundspider.spiders']
 NEWSPIDER_MODULE = 'fundspider.spiders'
 
+RANDOMIZE_DOWNLOAD_DELAY = True
+COOKIES_ENABLED = False
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'fundspider (+http://www.yourdomain.com)'
