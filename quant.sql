@@ -11,8 +11,8 @@ create table t_stock(
     stock_close int, 
     stock_low int, 
     stock_high int, 
-    stock_amount float, 
-    stock_vol int);
+    stock_amount BIGINT, 
+    stock_vol BIGINT);
 
 create table t_fund(
     fund_timestamp timestamp,

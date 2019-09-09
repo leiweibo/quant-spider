@@ -26,8 +26,8 @@ class FundspiderPipelineByTDEngine(object):
     def process_item(self, item, spider):
         if isinstance(item, FundspiderItem):
             self._process_fund(item)
-        # elif isinstance(item, FundNetValueItem):
-        #     self._process_fund_net_value(item)
+        elif isinstance(item, FundNetValueItem):
+            self._process_fund_net_value(item)
         return item
 
     '''
@@ -84,7 +84,7 @@ class FundspiderPipelineByTDEngine(object):
 
     
     def _check_if_data_exist(self, c_key, c_type):
-        sql = 'select count(*) from t_cache where c_key = "000270" and c_type = "fund_insert"'
+        sql = 'select count(*) from t_cache where c_key = "{c_key}" and c_type = "{c_type}"'
         
         try: 
             self.cursor.execute(sql)
