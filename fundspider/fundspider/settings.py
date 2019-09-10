@@ -17,6 +17,15 @@ NEWSPIDER_MODULE = 'fundspider.spiders'
 RANDOMIZE_DOWNLOAD_DELAY = True
 COOKIES_ENABLED = False
 
+from datetime import datetime
+
+# 文件及路径，log目录需要先建好
+today = datetime.now()
+log_file_path = "logs/scrapy_{}_{}_{}.log".format(today.year, today.month, today.day)
+
+# 日志输出
+LOG_LEVEL = 'ERROR'
+LOG_FILE = log_file_path
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'fundspider (+http://www.yourdomain.com)'

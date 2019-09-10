@@ -8,6 +8,7 @@
 
 import taos
 import datetime
+import logging
 
 from fundspider.items import FundspiderItem, FundNetValueItem
 class FundspiderPipelineByTDEngine(object):
@@ -17,7 +18,7 @@ class FundspiderPipelineByTDEngine(object):
     time_interval = datetime.timedelta(microseconds=1000)
     start_time = datetime.datetime.now()
     type_fund_insert = 'fund_insert'
-    type_fund_net_value_insert = 'fund_net_value_insert'
+    type_fund_net_value_insert = 'fundnetvalue_insert'
     def open_spider(self, spider):
         print('爬虫开始执行')
         self.conn = taos.connect(host='127.0.0.1', database='db_quant')
@@ -54,7 +55,8 @@ class FundspiderPipelineByTDEngine(object):
     处理资金净值数据
     '''
     def _process_fund_net_value(self, item):
-        if(self._check_if_data_exist(str(item['fund_symbol'] + item['fund_date']), self.type_fund_insert)):
+        exists = self._check_if_data_exist(str(item['fund_symbol'] + item['fund_date']), self.type_fund_net_value_insert)
+        if(exists):
             print('数据已经存在，不重复插入')
         else:
             fundDate = datetime.datetime.strptime(item['fund_date'], '%Y-%m-%d')
@@ -84,13 +86,16 @@ class FundspiderPipelineByTDEngine(object):
 
     
     def _check_if_data_exist(self, c_key, c_type):
-        sql = 'select count(*) from t_cache where c_key = "{c_key}" and c_type = "{c_type}"'
-        
+        sql = f'select count(*) from t_cache where c_key = "{c_key}" and c_type = "{c_type}"'
+        result = False
         try: 
             self.cursor.execute(sql)
             for c in self.cursor:
-                return c[0] > 0
-            return False
+                result = c[0] > 0
+                break
+            # logging.error(f'the check data exist sql: {sql}')
+            # logging.error(f'the check result is:{result}')
+            return result
         except Exception  as e:
             print('exception at check data if exists:' + str(e))
             return False
