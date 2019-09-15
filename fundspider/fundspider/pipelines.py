@@ -12,13 +12,18 @@ import logging
 
 from fundspider.items import FundspiderItem, FundNetValueItem
 class FundspiderPipelineByTDEngine(object):
+    fund_data = []
+    fund_net_value_data = []
+    fund_cache_data = []
 
     conn = None
     cursor = None
-    time_interval = datetime.timedelta(microseconds=1000)
-    start_time = datetime.datetime.now()
+    batch_size = 400
     type_fund_insert = 'fund_insert'
     type_fund_net_value_insert = 'fundnetvalue_insert'
+    insert_fund_sql_prefix = 'insert into t_fund(fund_timestamp, fund_symbol, fund_name) values '
+    insert_fund_net_value_sql_prefix = 'insert into t_fund_net_value(net_value_timestamp, fund_symbol, fund_date, fund_net_value, fund_accu_net_value, redemption_status, subscription_status) values '
+    insert_cache_prefix = 'insert into t_cache(cache_timestamp, c_key, c_type) values '
     def open_spider(self, spider):
         print('爬虫开始执行')
         self.conn = taos.connect(host='127.0.0.1', database='db_quant')
@@ -32,6 +37,22 @@ class FundspiderPipelineByTDEngine(object):
         return item
 
     '''
+    Save to db
+    '''
+    import taos
+    import pandas as pd
+    def _save_data_to_Db(self, sql, cursor, values):
+        values_str = ' '.join(str(e) for e in values)
+        if (values_str):
+            finalSql = sql + values_str
+            try:
+                self.cursor.execute(finalSql)
+                self.conn.commit()
+            except Exception as err:
+                print(err)
+                logging.error(f'exception: {finalSql}')
+
+    '''
     处理基金数据
     '''
     def _process_fund(self, item):
@@ -39,17 +60,14 @@ class FundspiderPipelineByTDEngine(object):
         if(exists):
             print('数据已经存在，不重复插入')
         else:
-            value = f"('{self.start_time}', '{item['fund_symbol']}', '{item['name']}')"
-            sql = 'insert into t_fund(fund_timestamp, fund_symbol, fund_name) values ' + value
-            self.start_time += self.time_interval
-            # 执行事务
-            try:
-                self.cursor.execute(sql)
-                self.conn.commit()
-                self._save_to_cache(item['fund_symbol'], self.type_fund_insert)
-            except Exception as e:
-                print('exception at process fund:' + str(e))
-                self.conn.rollback()
+            self._save_to_cache(str(item['fund_symbol']), self.type_fund_insert)
+            value = f"('{datetime.datetime.now()}', '{item['fund_symbol']}', '{item['name']}')"
+            self.fund_data.append(value)
+            if (len(self.fund_data) >= self.batch_size):
+                self._save_data_to_Db(self.insert_fund_sql_prefix, self.cursor, self.fund_data)
+                self.fund_data.clear()
+
+
 
     '''
     处理资金净值数据
@@ -59,30 +77,23 @@ class FundspiderPipelineByTDEngine(object):
         if(exists):
             print('数据已经存在，不重复插入')
         else:
+            self._save_to_cache(str(item['fund_symbol'] + item['fund_date']), self.type_fund_net_value_insert)
+
             fundDate = datetime.datetime.strptime(item['fund_date'], '%Y-%m-%d')
-            value = f"('{self.start_time}', '{item['fund_symbol']}', '{fundDate}', '{item['fund_net_value']}', '{item['fund_net_value']}', '{item['redemption_status']}', '{item['subscription_status']}')"
-            sql = 'insert into t_fund_net_value(net_value_timestamp, fund_symbol, fund_date, fund_net_value, fund_accu_net_value, redemption_status, subscription_status) values ' + value
-            self.start_time += self.time_interval
-            # 执行事务
-            try:
-                self.cursor.execute(sql)                
-                self.conn.commit()
-                self._save_to_cache(str(item['fund_symbol'] + item['fund_date']), self.type_fund_net_value_insert)
-            except Exception as e:
-                print('exception at process fund net value:' + str(e))
-                self.conn.rollback()
+            value = f"('{datetime.datetime.now()}', '{item['fund_symbol']}', '{fundDate}', '{item['fund_net_value']}', '{item['fund_net_value']}', '{item['redemption_status']}', '{item['subscription_status']}')"
+            self.fund_net_value_data.append(value)
+            if (len(self.fund_net_value_data) >= self.batch_size):
+                self._save_data_to_Db(self.insert_fund_net_value_sql_prefix, self.cursor, self.fund_net_value_data)
+                self.fund_net_value_data.clear()
+
 
     def _save_to_cache(self, c_key, c_type):
-        value =  f"('{self.start_time}', '{c_key}', '{c_type}')"
+        value =  f"('{datetime.datetime.now()}', '{c_key}', '{c_type}')"
         if (not self._check_if_data_exist(c_key, c_type)):
-            sql = 'insert into t_cache(cache_timestamp, c_key, c_type) values ' + value
-            self.start_time += self.time_interval
-            try:
-                self.cursor.execute(sql)
-                self.conn.commit()
-            except Exception as e:
-                print('exception at save to cache:' + str(e))
-                self.conn.rollback()
+            self.fund_cache_data.append(value)
+            if (len(self.fund_cache_data) >= self.batch_size):
+                self._save_data_to_Db(self.insert_cache_prefix, self.cursor, self.fund_cache_data)
+                self.fund_cache_data.clear()
 
     
     def _check_if_data_exist(self, c_key, c_type):
@@ -102,5 +113,12 @@ class FundspiderPipelineByTDEngine(object):
 
     def close_spider(self, spider):
         print('爬虫结束')
-        self.cursor.close
+        self._save_data_to_Db(self.insert_fund_sql_prefix, self.cursor, self.fund_data)
+        self.fund_data.clear()
+        self._save_data_to_Db(self.insert_fund_net_value_sql_prefix, self.cursor, self.fund_net_value_data)
+        self.fund_net_value_data.clear()
+        self._save_data_to_Db(self.insert_cache_prefix, self.cursor, self.fund_cache_data)
+        self.fund_cache_data.clear()
+
+        self.cursor.close()
         self.conn.close()

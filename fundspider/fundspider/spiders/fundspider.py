@@ -39,7 +39,7 @@ class fundspider(scrapy.Spider):
             targetFundListUrl = f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft={self.fundtype}&rs=&gs=0&sc=zzf&st=desc&pi={int(currentPage) + 1}&pn=1000&dx=1'
             print(f'最终的target: {targetFundListUrl}')
             yield scrapy.Request(targetFundListUrl, self.parse)
-    
+
     fund_net_value_count_dict = {}
     def parseHistoryNetvalue(self, response):
         fund_net_value_count = 0
@@ -53,7 +53,7 @@ class fundspider(scrapy.Spider):
                 val = record.contents
                 # 处理空值
                 if val == []:
-                    row_records.append('---')
+                    row_records.append('0')
                 else:
                     row_records.append(val[0])
             fund_net_value_count += 1
@@ -68,6 +68,7 @@ class fundspider(scrapy.Spider):
         #for test
         logging.error('the fund net value count is:' + str(fund_code) + "--->" + str(self.fund_net_value_count_dict[fund_code]))
         pages = int(re.findall('pages:(\d*)', rawResponse)[0])
+        # pages = 1 # for test
         curpage = int(re.findall('curpage:(\d*)', rawResponse)[0])
         if (int(curpage) < int(pages)):
             dt = datetime.now()
