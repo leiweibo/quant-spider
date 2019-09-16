@@ -1,6 +1,6 @@
 [[source]]
 name = "pypi"
-url = "https://pypi.org/simple"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 verify_ssl = true
 
 [dev-packages]
@@ -9,6 +9,9 @@ verify_ssl = true
 scrapy = "*"
 beautifulsoup4 = "*"
 taos = {path = "/home/weibolei/Dev/TDengine/src/connector/python/linux/python3"}
+pandas = "*"
+datetime = "*"
+twisted = "*"
 
 [requires]
 python_version = "3.6"
