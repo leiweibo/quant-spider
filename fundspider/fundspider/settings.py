@@ -24,7 +24,7 @@ today = datetime.now()
 log_file_path = "logs/scrapy_{}_{}_{}.log".format(today.year, today.month, today.day)
 
 # 日志输出
-LOG_LEVEL = 'ERROR'
+LOG_LEVEL = 'INFO'
 LOG_FILE = log_file_path
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent

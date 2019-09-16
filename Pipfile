@@ -12,6 +12,7 @@ taos = {path = "/home/weibolei/Dev/TDengine/src/connector/python/linux/python3"}
 pandas = "*"
 datetime = "*"
 twisted = "*"
+time = "*"
 
 [requires]
 python_version = "3.6"
