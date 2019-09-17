@@ -43,8 +43,6 @@ class fundspider(scrapy.Spider):
             print(f'最终的target: {targetFundListUrl}')
             yield scrapy.Request(targetFundListUrl, self.parse)
 
-
-
     fund_net_value_count_dict = {}
     def parseHistoryNetvalue(self, response):
         fund_net_value_count = 0
