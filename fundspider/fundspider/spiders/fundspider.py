@@ -13,7 +13,7 @@ class fundspider(scrapy.Spider):
     allowed_domains = ["www.eastmoney.com/", "fund.eastmoney.com"]
     start_urls = [
         # 'http://fund.eastmoney.com/js/fundcode_search.js'
-        f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=zzf&st=desc&pi=1&pn=10&dx=1'
+        f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=zzf&st=desc&pi=1&pn=1000&dx=1'
     ]
 
     fund_count = 0

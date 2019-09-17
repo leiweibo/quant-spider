@@ -27,7 +27,7 @@ class FundspiderPipelineByTDEngine(object):
     insert_cache_prefix = 'insert into t_cache(cache_timestamp, c_key, c_type) values '
     def open_spider(self, spider):
         print('爬虫开始执行')
-        self.conn = taos.connect(host='127.0.0.1', database='db_quant_copy')
+        self.conn = taos.connect(host='127.0.0.1', database='db_quant')
         self.cursor = self.conn.cursor()
 
     def process_item(self, item, spider):
@@ -45,7 +45,7 @@ class FundspiderPipelineByTDEngine(object):
     import taos
     import pandas as pd
     @defer.inlineCallbacks
-    def _save_data_to_Db(self, sql, cursor, values, commitDirectly):
+    def _save_data_to_Db(self, sql, cursor, values):
         values_str = ' '.join(str(e) for e in values)
         if (values_str):
             finalSql = sql + values_str
@@ -81,7 +81,7 @@ class FundspiderPipelineByTDEngine(object):
             value = f"('{datetime.datetime.now()}', '{item['fund_symbol']}', '{item['name']}')"
             self.fund_data.append(value)
             if (len(self.fund_data) >= self.batch_size):
-                self._save_data_to_Db(self.insert_fund_sql_prefix, self.cursor, self.fund_data, True)
+                self._save_data_to_Db(self.insert_fund_sql_prefix, self.cursor, self.fund_data)
                 self.fund_data.clear()
 
     '''
@@ -98,33 +98,19 @@ class FundspiderPipelineByTDEngine(object):
             value = f"('{datetime.datetime.now()}', '{item['fund_symbol']}', '{fundDate}', '{item['fund_net_value']}', '{item['fund_net_value']}', '{item['redemption_status']}', '{item['subscription_status']}')"
             self.fund_net_value_data.append(value)
             if (len(self.fund_net_value_data) >= self.batch_size):
-<<<<<<< HEAD
-                self._save_data_to_Db(self.insert_fund_net_value_sql_prefix, self.cursor, self.fund_net_value_data, True)
-                self.fund_net_value_data.clear()
-=======
                 self._save_data_to_Db(self.insert_fund_net_value_sql_prefix, self.cursor, self.fund_net_value_data)
                 self.fund_net_value_data.clear()
 
->>>>>>> ff99678ad66ebd0fcc71951c8ed939a17f729e06
 
     # TODO: Save to redis
     def _save_to_cache(self, c_key, c_type):
-<<<<<<< HEAD
-        pass
         # value =  f"('{datetime.datetime.now()}', '{c_key}', '{c_type}')"
         # if (not self._check_if_data_exist(c_key, c_type)):
         #     self.fund_cache_data.append(value)
         #     if (len(self.fund_cache_data) >= self.batch_size):
-        #         self._save_data_to_Db(self.insert_cache_prefix, self.cursor, self.fund_cache_data, False)
+        #         self._save_data_to_Db(self.insert_cache_prefix, self.cursor, self.fund_cache_data)
         #         self.fund_cache_data.clear()
-=======
-        value =  f"('{datetime.datetime.now()}', '{c_key}', '{c_type}')"
-        if (not self._check_if_data_exist(c_key, c_type)):
-            self.fund_cache_data.append(value)
-            if (len(self.fund_cache_data) >= self.batch_size):
-                self._save_data_to_Db(self.insert_cache_prefix, self.cursor, self.fund_cache_data)
-                self.fund_cache_data.clear()
->>>>>>> ff99678ad66ebd0fcc71951c8ed939a17f729e06
+        pass
 
     ## TODO: Check in redis
     def _check_if_data_exist(self, c_key, c_type):
@@ -145,10 +131,9 @@ class FundspiderPipelineByTDEngine(object):
 
     def close_spider(self, spider):
         print('爬虫结束')
-<<<<<<< HEAD
-        self._save_data_to_Db(self.insert_fund_sql_prefix, self.cursor, self.fund_data, False)
+        self._save_data_to_Db(self.insert_fund_sql_prefix, self.cursor, self.fund_data)
         self.fund_data.clear()
-        self._save_data_to_Db(self.insert_fund_net_value_sql_prefix, self.cursor, self.fund_net_value_data, False)
+        self._save_data_to_Db(self.insert_fund_net_value_sql_prefix, self.cursor, self.fund_net_value_data)
         self.fund_net_value_data.clear()
         self._save_data_to_Db(self.insert_cache_prefix, self.cursor, self.fund_cache_data, True)
         self.fund_cache_data.clear()
@@ -157,14 +142,3 @@ class FundspiderPipelineByTDEngine(object):
             self.conn.close()
         except Exception as e:
             pass
-=======
-        self._save_data_to_Db(self.insert_fund_sql_prefix, self.cursor, self.fund_data)
-        self.fund_data.clear()
-        self._save_data_to_Db(self.insert_fund_net_value_sql_prefix, self.cursor, self.fund_net_value_data)
-        self.fund_net_value_data.clear()
-        self._save_data_to_Db(self.insert_cache_prefix, self.cursor, self.fund_cache_data)
-        self.fund_cache_data.clear()
-
-        self.cursor.close()
-        self.conn.close()
->>>>>>> ff99678ad66ebd0fcc71951c8ed939a17f729e06
