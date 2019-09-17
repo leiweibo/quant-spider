@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS db_quant_copy precision 'us';
+CREATE DATABASE IF NOT EXISTS db_quant precision 'us';
 
-USE db_quant_copy;
+USE db_quant;
 
 
 
