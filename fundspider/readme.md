@@ -1,8 +1,8 @@
 #### 使用方法
 1. 安装pipenv，可以参考 [这里](https://www.jianshu.com/p/d06684101a3d)
-2. pipenv 安装完成之后，执行`pipenv shell` 进入到pipenv虚拟环境中，然后执行`pipenv sync` 安装依赖，这里需要修改一下 Pipfile.lock里面taos的依赖，我写的是本地的路径，暂时先手动去修改
+2. pipenv 安装完成之后，执行`pipenv shell` 进入到pipenv虚拟环境中，然后执行`pipenv sync` 安装依赖，这里需要修改一下 Pipfile.lock里面taos的依赖，我写的是本地的路径，暂时先手动去修改，暂时我本地的python是3.6版本，如果版本不一致需要修改一下里面的python version
 3. 执行quant.sql文件里面的脚本
-4. 依赖安装完成之后，scrapy crawl fund-spider 这样就可以运行
+4. 依赖安装完成之后，进入到fundspider/fundspider 目录下，然后执行scrapy crawl fund-spider 这样就可以运行
 
 ### TODO
     [] scrapy层进行去重处理
