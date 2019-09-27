@@ -5,9 +5,11 @@ import base64
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+import numpy as np
 
 EMAIL = 'cqc@cuiqingcai.com'
 PASSWORD = ''
@@ -24,6 +26,8 @@ class CrackGeetest():
         self.wait = WebDriverWait(self.browser, 20)
         self.email = EMAIL
         self.password = PASSWORD
+        self.max_retry_cnt = 3
+        self.retried_cnt = 0
     
     '''
     浏览器打开网址，并且填入账号密码，然后点击登录按钮，出现图形验证码
@@ -57,42 +61,141 @@ class CrackGeetest():
         file.write(image_base)
         file.close()
 
-    def crack(self):
+    '''
+    基于极验的两张图片，计算两张图片该移动的距离
+    :param image1: 不带缺口图片
+    :param image2: 带缺口图片
+    '''
+    def get_move_distance(self, image1, image2):
+        left = 0
+        for i in range(left, image1.size[0]):
+            for j in range(image1.size[1]):
+                if not self.is_pixel_equal(image1, image2, i, j):
+                    left = i
+                    return left
+        return left
+    
+    
+    """
+    判断两个像素是否相同
+    :param image1: 图片1
+    :param image2: 图片2
+    :param x: 位置x
+    :param y: 位置y
+    :return: 像素是否相同
+    """
+    def is_pixel_equal(self, image1, image2, x, y):
+        # 取两个图片的像素点
+        pixel1 = image1.load()[x, y]
+        pixel2 = image2.load()[x, y]
+        threshold = 30
+        if abs(pixel1[0] - pixel2[0]) < threshold and abs(pixel1[1] - pixel2[1]) < threshold and abs(
+                pixel1[2] - pixel2[2]) < threshold:
+            return True
+        else:
+            return False
+
+    """
+    根据偏移量获取移动轨迹
+    :param distance: 偏移量
+    :return: 移动轨迹
+    """
+    def get_track(self, distance):
+        # 移动轨迹
+        track = []
+        # 当前位移
+        current = 0
+        # 减速阈值
+        mid = distance * 4 / 5
+        # 计算间隔
+        t = 0.2
+        # 初速度
+        v = 0
+        
+        while current < distance:
+            if current < mid:
+                # 加速度为正2
+                a = 6
+            else:
+                # 加速度为负3
+                a = -7
+            # 初速度v0
+            v0 = v
+            # 当前速度v = v0 + at
+            v = v0 + a * t
+            # 移动距离x = v0t + 1/2 * a * t^2
+            move = v0 * t + 1 / 2 * a * t * t
+            # 当前位移
+            current += move
+            # 加入轨迹
+            track.append(round(move))
+        # 矫正最后一个长度，如果current > 超过 distance，则需要最后一个数组减掉多滑的距离，
+        # 否则需要加上少滑动的距离。
+        total_distance = np.sum(track)
+        print(total_distance)
+        print(track)
+        track[len(track) - 1] -= (total_distance - distance)
+        print(track)
+        return track
+
+
+    """
+    拖动滑块到缺口处
+    :param slider: 滑块
+    :param track: 轨迹
+    :return:
+    """
+    def start_to_move(self, track):
+        slider = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'geetest_slider_button')))
+        ActionChains(self.browser).click_and_hold(slider).perform()
+        for x in track:
+            ActionChains(self.browser).move_by_offset(xoffset=x, yoffset=0).perform()
+        ActionChains(self.browser).release().perform()
+
+
+    def crack(self, reset_status = True):
         # 访问网站并且输入用户名和密码，然后点击验证码按钮
-        self.prepare_for_login()
-        # 保存图片t
+        if reset_status:
+            self.prepare_for_login()
+        # 保存图片
         # image1 = self.get_geetest_image()
         self.save_captcha_img('captcha1.png', 'geetest_canvas_fullbg')
         self.save_captcha_img('captcha2.png','geetest_canvas_bg')
 
-        time.sleep(10)
-        self.browser.quit()
-        # # 点按呼出缺口
-        # slider = self.get_slider()
-        # slider.click()
-        # # 获取带缺口的验证码图片
-        # image2 = self.get_geetest_image('captcha2.png')
-        # # 获取缺口位置
-        # gap = self.get_gap(image1, image2)
-        # print('缺口位置', gap)
-        # # 减去缺口位移
-        # gap -= BORDER
-        # # 获取移动轨迹
-        # track = self.get_track(gap)
-        # print('滑动轨迹', track)
-        # # 拖动滑块
-        # self.move_to_gap(slider, track)
-        
-        # success = self.wait.until(
-        #     EC.text_to_be_present_in_element((By.CLASS_NAME, 'geetest_success_radar_tip_content'), '验证成功'))
-        # print(success)
-        
-        # # 失败后重试
-        # if not success:
-        #     self.crack()
-        # else:
-        #     self.login()
+        # 计算移动距离
+        img1 = Image.open('captcha1.png')
+        img2 = Image.open('captcha2.png')
+        move_distance = self.get_move_distance(img1, img2)
+        print('need move move_distance:' + str(move_distance))
 
+        move_distance -= BORDER
+        # 获取轨迹
+        track = self.get_track(move_distance)
+        # 开始移动
+        self.start_to_move(track)
+
+        try:
+            btn_error_and_retry = WebDriverWait(self.browser, 1, 0.2).until(EC.element_to_be_clickable((By.CLASS_NAME, 'geetest_panel_error_content')))
+            btn_error_and_retry.click()
+        except:
+            print('没有出现超时错误，忽略')
+
+        ## geetest_fail,geetest_success
+        try:
+            WebDriverWait(self.browser, 5, 0.2).until(EC.presence_of_element_located((By.CLASS_NAME, 'geetest_success')))
+            
+        except TimeoutException:
+            print("验证失败")
+            # 失败之后，继续第二次校验，最多校验3次
+            if self.retried_cnt < self.max_retry_cnt:
+                self.crack(False)
+                self.retried_cnt += 1
+        else:
+            print("验证成功")
+            time.sleep(10)
+            self.retried_cnt = 0
+            self.browser.quit()
+            
 
 if __name__ == '__main__':
     crack = CrackGeetest()
