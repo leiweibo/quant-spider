@@ -106,7 +106,7 @@ class CrackGeetest():
         # 当前位移
         current = 0
         # 减速阈值
-        mid = distance * 4 / 5
+        mid = distance * 3 / 5
         # 计算间隔
         t = 0.2
         # 初速度
@@ -115,7 +115,7 @@ class CrackGeetest():
         while current < distance:
             if current < mid:
                 # 加速度为正2
-                a = 6
+                a = 10
             else:
                 # 加速度为负3
                 a = -7
@@ -174,11 +174,6 @@ class CrackGeetest():
         # 开始移动
         self.start_to_move(track)
 
-        try:
-            btn_error_and_retry = WebDriverWait(self.browser, 1, 0.2).until(EC.element_to_be_clickable((By.CLASS_NAME, 'geetest_panel_error_content')))
-            btn_error_and_retry.click()
-        except:
-            print('没有出现超时错误，忽略')
 
         ## geetest_fail,geetest_success
         try:
@@ -186,16 +181,25 @@ class CrackGeetest():
             
         except TimeoutException:
             print("验证失败")
+
+            try:
+                btn_error_and_retry = WebDriverWait(self.browser, 1, 0.2).until(EC.element_to_be_clickable((By.CLASS_NAME, 'geetest_panel_error_content')))
+                btn_error_and_retry.click()
+            except:
+                print('没有出现超时错误，忽略')
+
             # 失败之后，继续第二次校验，最多校验3次
             if self.retried_cnt < self.max_retry_cnt:
                 self.crack(False)
                 self.retried_cnt += 1
         else:
             print("验证成功")
-            time.sleep(10)
+            time.sleep(3)
             self.retried_cnt = 0
             self.browser.quit()
             
+        
+       
 
 if __name__ == '__main__':
     crack = CrackGeetest()
