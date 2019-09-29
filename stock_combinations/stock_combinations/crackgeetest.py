@@ -44,7 +44,7 @@ class CrackGeetest():
         user_name = self.wait.until(EC.presence_of_element_located((By.NAME, 'username')))
         password = self.wait.until(EC.presence_of_element_located((By.NAME, 'password')))
         user_name.send_keys('15669761293')
-        password.send_keys('123123lei')
+        password.send_keys('')
         real_login_btn = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'Loginmodal_modal__login__btn_uk7')))
         real_login_btn.click()
 
@@ -193,36 +193,21 @@ class CrackGeetest():
             if self.retried_cnt < self.max_retry_cnt:
                 self.crack(False)
                 self.retried_cnt += 1
+            else:
+                return False
         else:
             print("验证成功")
             time.sleep(3)
             self.retried_cnt = 0
-            # self.browser.quit()
-            
-        cookie = self.browser.get_cookies()
-        import json
-        jsonCookies = json.dumps(cookie)
-        with open('xueqiu_cookie.json', 'w') as f:
-            f.write(jsonCookies)
-
-        import json
-        str=''
-        with open('xueqiu_cookie.json','r',encoding='utf-8') as f:
-            listCookies=json.loads(f.read())
-        cookie = [item["name"] + "=" + item["value"] for item in listCookies]
-        cookiestr = '; '.join(item for item in cookie)
-        print(cookiestr)
-        url = 'https://xueqiu.com/cubes/rebalancing/history.json?cube_symbol=ZH010389&count=20&page=1'
-        send_headers={
-            'cookie':cookiestr,
-            'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36'
-        }
-
-        import urllib.request
-        req = urllib.request.Request(url = url, headers=send_headers)
-        resp = urllib.request.urlopen(req)
-        html = resp.read().decode('utf-8')
-        print(html)
+            # 登录成功之后，写入到cookie到本地文件
+            cookie = self.browser.get_cookies()
+            import json
+            jsonCookies = json.dumps(cookie)
+            with open('xueqiu_cookie.json', 'w') as f:
+                print(f'将cookies写入到文件: {jsonCookies}')
+                f.write(jsonCookies)
+                f.close()
+            return True
 
         self.browser.quit()
        

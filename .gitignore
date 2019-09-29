@@ -2,3 +2,4 @@
 .history/
 **/*.png
 **/*.log
+**/xueqiu_cookie.json
