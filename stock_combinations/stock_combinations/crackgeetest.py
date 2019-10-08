@@ -207,9 +207,9 @@ class CrackGeetest():
                 print(f'将cookies写入到文件: {jsonCookies}')
                 f.write(jsonCookies)
                 f.close()
+            self.browser.quit()
             return True
 
-        self.browser.quit()
        
 
 if __name__ == '__main__':
