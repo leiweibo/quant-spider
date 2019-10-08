@@ -44,7 +44,7 @@ class CrackGeetest():
         user_name = self.wait.until(EC.presence_of_element_located((By.NAME, 'username')))
         password = self.wait.until(EC.presence_of_element_located((By.NAME, 'password')))
         user_name.send_keys('15669761293')
-        password.send_keys('')
+        password.send_keys('870304lei')
         real_login_btn = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'Loginmodal_modal__login__btn_uk7')))
         real_login_btn.click()
 

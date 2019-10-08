@@ -13,6 +13,7 @@ pandas = "*"
 selenium = "*"
 pillow = "*"
 requests = "*"
+fake-useragent = "*"
 
 [requires]
 python_version = "3.7"

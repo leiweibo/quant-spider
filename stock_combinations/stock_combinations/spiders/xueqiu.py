@@ -29,11 +29,11 @@ class XueqiuSpider(scrapy.Spider):
         url = "https://httpbin.org/get?show_env=1"
         send_headers={
             'cookie': cookiestr,
-            'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36'
+            # 'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36'
         }
 
-        print(f'headers的内容是：{send_headers}')
-        print({cookiestr})
+        # print(f'headers的内容是：{send_headers}')
+        # print({cookiestr})
         yield scrapy.Request(combination_adjust_url, headers = send_headers)
 
     def parse(self, response):
