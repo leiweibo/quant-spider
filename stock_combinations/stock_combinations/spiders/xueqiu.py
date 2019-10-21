@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-from stock_combinations.crackgeetest import CrackGeetest
+from stock_combinations.crackxueqiulogin import CrackXueqiu
 
 class XueqiuSpider(scrapy.Spider):
     name = 'xueqiu'
@@ -10,7 +10,7 @@ class XueqiuSpider(scrapy.Spider):
     login_result = True
 
     def __init__(self):
-        crack = CrackGeetest()
+        crack = CrackXueqiu()
         self.login_result = crack.crack()
     
 

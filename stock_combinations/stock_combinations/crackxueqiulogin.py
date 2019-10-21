@@ -17,10 +17,14 @@ BORDER = 6
 INIT_LEFT = 60
 
 
-class CrackGeetest():
+class CrackXueqiu():
     def __init__(self):
         self.url = 'https://xueqiu.com'
         self.chrome_options = webdriver.ChromeOptions()
+        self.chrome_options.add_argument('--window-size=1920,1080')
+        self.chrome_options.add_argument('--start-maximized')
+        self.chrome_options.add_argument('--headless')
+        self.chrome_options.add_argument('--disable-gpu')
         self.chrome_options.add_experimental_option("detach", True)
         self.browser = webdriver.Chrome(chrome_options = self.chrome_options)
         self.wait = WebDriverWait(self.browser, 20)
@@ -38,13 +42,12 @@ class CrackGeetest():
         :return: None
         """
         self.browser.get(self.url)
-        
         login_btn = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'Header_nav__login__btn_1YU')))
         login_btn.click()
         user_name = self.wait.until(EC.presence_of_element_located((By.NAME, 'username')))
         password = self.wait.until(EC.presence_of_element_located((By.NAME, 'password')))
         user_name.send_keys('15669761293')
-        password.send_keys('870304lei')
+        password.send_keys('1234rewQ')
         real_login_btn = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'Loginmodal_modal__login__btn_uk7')))
         real_login_btn.click()
 
@@ -213,5 +216,5 @@ class CrackGeetest():
        
 
 if __name__ == '__main__':
-    crack = CrackGeetest()
+    crack = CrackXueqiu()
     crack.crack()
