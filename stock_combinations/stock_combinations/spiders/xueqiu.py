@@ -9,6 +9,45 @@ class XueqiuSpider(scrapy.Spider):
     start_urls = ['http://xueqiu.com/']
     login_result = True
 
+    # dictionary to map UserItem fields to Jmes query paths
+    jmes_paths : {
+        'id' : 'id',
+        'name' : 'name',
+        'description' : 'description',
+        'active_flag' : 'active_flag',
+        'star' : 'star',
+        'market' : 'market',
+        'owner_id' : 'owner_id',
+        'create_at' : 'create_at',
+        'update_at' : 'update_at',
+        'last_rb_id' : 'last_rb_id',
+        'daily_gain' : 'daily_gain',
+        'month_gain' : 'month_gain',
+        'total_gain' : 'total_gain',
+        'net_value' : 'net_value',
+        'rank_percent' : 'rank_percent',
+        'annualized_gain_rate' : 'annualized_gain_rate',
+        'bb_rate' : 'bb_rate',
+        'follower_count' : 'follower_count',
+        'view_rebalancing' : 'view_rebalancing',
+        'last_reblanceing' : 'last_reblanceing',
+        'last_success_rebalance' : 'last_success_rebalance',
+        'tag' : 'tag',
+        'recomment_reason' : 'recomment_reason',
+        'sale_flag' : 'sale_flag',
+        'sell_flag' : 'sell_flag',
+        'commission' : 'commission',
+        'initial_capital' : 'initial_capital',
+        'listed_flag' : 'listed_flag',
+        'countractor_id' : 'countractor_id',
+        'last_user_rb_gid' : 'last_user_rb_gid',
+        'performance' : 'performance',
+        'closed_at' : 'closed_at',
+        'badge_exist' : 'badge_exist',
+        'rankingDate' : 'rankingDate',
+        'owner' : 'owner.["screen_name", "id", "description", "province", "friends_count", "followers_count"]'
+    }
+
     def __init__(self):
         crack = CrackXueqiu()
         self.login_result = crack.crack()
@@ -34,8 +73,10 @@ class XueqiuSpider(scrapy.Spider):
 
         # print(f'headers的内容是：{send_headers}')
         # print({cookiestr})
-        yield scrapy.Request(combination_adjust_url, headers = send_headers)
+        url = 'https://xueqiu.com/cubes/discover/rank/cube/list.json?category=14&page=1&count=20'
+        yield scrapy.Request(url, headers = send_headers)
 
     def parse(self, response):
-        print(response.text)
+        jsonresponse = json.loads(response.body_as_unicode())
+        print(jsonresponse)
         pass
