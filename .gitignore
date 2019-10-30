@@ -1,2 +1,7 @@
 **/logs/
-.vscode
+**/.DS_Store
+.history/
+**/*.png
+**/*.log
+**/xueqiu_cookie.json
+**/.vscode
