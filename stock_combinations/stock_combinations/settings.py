@@ -20,6 +20,9 @@ NEWSPIDER_MODULE = 'stock_combinations.spiders'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
+ITEM_PIPELINES = {
+    'stock_combinations.pipelines.StockCombinationsPipeline': 300,
+}
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32

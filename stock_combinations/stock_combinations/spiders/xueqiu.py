@@ -2,6 +2,9 @@
 import scrapy
 import json
 from stock_combinations.crackxueqiulogin import CrackXueqiu
+from scrapy.loader import ItemLoader
+from stock_combinations.items import StockCombinationsItem
+from scrapy.loader.processors import Join, MapCompose, SelectJmes
 
 class XueqiuSpider(scrapy.Spider):
     name = 'xueqiu'
@@ -10,7 +13,7 @@ class XueqiuSpider(scrapy.Spider):
     login_result = True
 
     # dictionary to map UserItem fields to Jmes query paths
-    jmes_paths : {
+    jmes_paths = {
         'id' : 'id',
         'name' : 'name',
         'description' : 'description',
@@ -45,12 +48,13 @@ class XueqiuSpider(scrapy.Spider):
         'closed_at' : 'closed_at',
         'badge_exist' : 'badge_exist',
         'rankingDate' : 'rankingDate',
-        'owner' : 'owner.["screen_name", "id", "description", "province", "friends_count", "followers_count"]'
+        'owner' : 'owner'
     }
 
     def __init__(self):
-        crack = CrackXueqiu()
-        self.login_result = crack.crack()
+        # crack = CrackXueqiu()
+        # self.login_result = crack.crack()
+        pass
     
 
     def start_requests(self):
@@ -78,5 +82,11 @@ class XueqiuSpider(scrapy.Spider):
 
     def parse(self, response):
         jsonresponse = json.loads(response.body_as_unicode())
-        print(jsonresponse)
-        pass
+        for c in jsonresponse['list']:
+            loader = ItemLoader(item = StockCombinationsItem())
+            loader.default_input_processor = MapCompose(str)
+            loader.default_output_processor = Join(' ')
+
+            for (field, path) in self.jmes_paths.items():
+                loader.add_value(field, SelectJmes(path)(c))
+            yield loader.load_item()

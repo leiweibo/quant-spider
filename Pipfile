@@ -14,6 +14,7 @@ selenium = "*"
 pillow = "*"
 requests = "*"
 fake-useragent = "*"
+jmespath = "*"
 
 [requires]
 python_version = "3.7"

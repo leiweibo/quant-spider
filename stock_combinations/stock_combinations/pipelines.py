@@ -8,4 +8,5 @@
 
 class StockCombinationsPipeline(object):
     def process_item(self, item, spider):
+        print(f"--------------------------{item['owner']}")
         return item
