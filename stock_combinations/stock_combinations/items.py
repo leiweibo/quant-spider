@@ -44,3 +44,7 @@ class StockCombinationsItem(scrapy.Item):
     badge_exist = scrapy.Field()
     rankingDate = scrapy.Field()
     owner = scrapy.Field()
+
+class OwnerItem(scrapy.Item):
+    id = scrapy.Field()
+    screen_name = scrapy.Field()

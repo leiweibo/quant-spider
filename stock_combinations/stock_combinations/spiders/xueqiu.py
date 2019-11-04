@@ -3,7 +3,7 @@ import scrapy
 import json
 from stock_combinations.crackxueqiulogin import CrackXueqiu
 from scrapy.loader import ItemLoader
-from stock_combinations.items import StockCombinationsItem
+from stock_combinations.items import StockCombinationsItem, OwnerItem
 from scrapy.loader.processors import Join, MapCompose, SelectJmes
 
 class XueqiuSpider(scrapy.Spider):
@@ -53,6 +53,11 @@ class XueqiuSpider(scrapy.Spider):
         'owner' : 'owner'
     }
 
+    owner_jmes_paths = {
+        'id': 'id',
+        'screen_name': 'screen_name'
+    }
+
     def __init__(self):
         # crack = CrackXueqiu()
         # self.login_result = crack.crack()
@@ -95,6 +100,16 @@ class XueqiuSpider(scrapy.Spider):
             for (field, path) in self.jmes_paths.items():
                 loader.add_value(field, SelectJmes(path)(c))
             item = loader.load_item()
+            
+
+            ownerLoader = ItemLoader(item = OwnerItem())
+            ownerLoader.default_input_processor = MapCompose(str)
+            ownerLoader.default_output_processor = Join(' ')
+            for (field, path) in self.owner_jmes_paths.items():
+                ownerLoader.add_value(field, SelectJmes(path)(c['owner']))
+            owner = ownerLoader.load_item()
+
+            item['owner'] = owner
             yield item
             
         
