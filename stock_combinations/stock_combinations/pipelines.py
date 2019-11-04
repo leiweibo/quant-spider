@@ -8,5 +8,9 @@
 
 class StockCombinationsPipeline(object):
     def process_item(self, item, spider):
-        print(f"--------------------------{item['owner']}")
+        print(f"--------------------------{type(item['owner'])}")
+        # with open('combination.json', 'a') as f:
+        #         f.write(str(item['name']) + ' by ' + str(item['owner']['screen_name']))
+        #         f.write('\\n')
+        #         f.close()
         return item

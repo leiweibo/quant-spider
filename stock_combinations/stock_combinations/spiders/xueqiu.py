@@ -11,6 +11,8 @@ class XueqiuSpider(scrapy.Spider):
     allowed_domains = ['xueqiu.com']
     start_urls = ['http://xueqiu.com/']
     login_result = True
+    cookiestr = ''
+    send_headers = {}
 
     # dictionary to map UserItem fields to Jmes query paths
     jmes_paths = {
@@ -66,22 +68,25 @@ class XueqiuSpider(scrapy.Spider):
         with open('xueqiu_cookie.json','r',encoding='utf-8') as f:
             listCookies = json.loads(f.read())
         cookie = [item["name"] + "=" + item["value"] for item in listCookies]
-        cookiestr = '; '.join(item for item in cookie)
-        print(f'从文件中读取的cookie: {cookiestr}')
+        self.cookiestr = '; '.join(item for item in cookie)
+        print(f'从文件中读取的cookie: {self.cookiestr}')
         combination_adjust_url = 'https://xueqiu.com/cubes/rebalancing/history.json?cube_symbol=ZH010389&count=20&page=1'
         url = "https://httpbin.org/get?show_env=1"
-        send_headers={
-            'cookie': cookiestr,
+        self.send_headers={
+            'cookie': self.cookiestr,
             # 'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36'
         }
 
         # print(f'headers的内容是：{send_headers}')
         # print({cookiestr})
-        url = 'https://xueqiu.com/cubes/discover/rank/cube/list.json?category=14&page=1&count=20'
-        yield scrapy.Request(url, headers = send_headers)
+        currentPage = 1
+        url = f'https://xueqiu.com/cubes/discover/rank/cube/list.json?category=14&page={currentPage}&count=20'
+        yield scrapy.Request(url, headers = self.send_headers)
 
     def parse(self, response):
         jsonresponse = json.loads(response.body_as_unicode())
+        # yield jsonresponse
+
         for c in jsonresponse['list']:
             loader = ItemLoader(item = StockCombinationsItem())
             loader.default_input_processor = MapCompose(str)
@@ -89,4 +94,14 @@ class XueqiuSpider(scrapy.Spider):
 
             for (field, path) in self.jmes_paths.items():
                 loader.add_value(field, SelectJmes(path)(c))
-            yield loader.load_item()
+            item = loader.load_item()
+            yield item
+            
+        
+        page = jsonresponse['page']
+        maxPage = jsonresponse['maxPage']
+        if (page < maxPage):
+            self.url = f'https://xueqiu.com/cubes/discover/rank/cube/list.json?category=14&page={page+1}&count=20'
+        print('the url is: {self.url}, the headers: {self.headers}')
+        yield scrapy.Request(self.url, headers = self.send_headers)
+
