@@ -5,3 +5,4 @@
 **/*.log
 **/xueqiu_cookie.json
 **/.vscode
+**/.json

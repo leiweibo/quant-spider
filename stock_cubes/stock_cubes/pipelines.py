@@ -6,9 +6,9 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
 
-class StockCombinationsPipeline(object):
+class StockCubesPipeline(object):
     def process_item(self, item, spider):
-        with open('combination.json', 'a') as f:
+        with open('cube.json', 'a') as f:
                 f.write(str(item['name']) + ' by ' + str(item['owner']))
                 f.write('\n')
                 f.close()

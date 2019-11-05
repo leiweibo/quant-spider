@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-from stock_combinations.crackxueqiulogin import CrackXueqiu
+from stock_cubes.crackxueqiulogin import CrackXueqiu
 from scrapy.loader import ItemLoader
-from stock_combinations.items import StockCombinationsItem, OwnerItem
+from stock_cubes.items import StockCubesItem, OwnerItem
 from scrapy.loader.processors import Join, MapCompose, SelectJmes
 
 class XueqiuSpider(scrapy.Spider):
@@ -34,8 +34,8 @@ class XueqiuSpider(scrapy.Spider):
     }
 
     def __init__(self):
-        # crack = CrackXueqiu()
-        # self.login_result = crack.crack()
+        crack = CrackXueqiu()
+        self.login_result = crack.crack()
         pass
     
 
@@ -50,7 +50,7 @@ class XueqiuSpider(scrapy.Spider):
         cookie = [item["name"] + "=" + item["value"] for item in listCookies]
         self.cookiestr = '; '.join(item for item in cookie)
         print(f'从文件中读取的cookie: {self.cookiestr}')
-        combination_adjust_url = 'https://xueqiu.com/cubes/rebalancing/history.json?cube_symbol=ZH010389&count=20&page=1'
+        cube_adjust_url = 'https://xueqiu.com/cubes/rebalancing/history.json?cube_symbol=ZH010389&count=20&page=1'
         url = "https://httpbin.org/get?show_env=1"
         self.send_headers={
             'cookie': self.cookiestr,
@@ -68,7 +68,7 @@ class XueqiuSpider(scrapy.Spider):
         # yield jsonresponse
 
         for c in jsonresponse['list']:
-            loader = ItemLoader(item = StockCombinationsItem())
+            loader = ItemLoader(item = StockCubesItem())
             loader.default_input_processor = MapCompose(str)
             loader.default_output_processor = Join(' ')
 
@@ -93,8 +93,8 @@ class XueqiuSpider(scrapy.Spider):
             # 组合信息：
             # https://xueqiu.com/cubes/quote.json?code=ZH976766,SP1034535,SP1012810,ZH1160206,ZH2003755,ZH1996976,ZH1079481,ZH1174824,ZH1079472,SP1040320
             uid = owner['id']
-            createdCombinationUrl = f'https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid={uid}&pid=-24'
-            yield scrapy.Request(createdCombinationUrl, self.parseAuthorCreatedCombination, headers = self.send_headers)
+            createdCubeUrl = f'https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid={uid}&pid=-24'
+            yield scrapy.Request(createdCubeUrl, self.parseAuthorCreatedCube, headers = self.send_headers)
             
             
         
@@ -105,7 +105,7 @@ class XueqiuSpider(scrapy.Spider):
         print('the url is: {self.url}, the headers: {self.headers}')
         yield scrapy.Request(self.url, headers = self.send_headers)
 
-    def parseAuthorCreatedCombination(self, response): 
+    def parseAuthorCreatedCube(self, response): 
         jsonresponse = json.loads(response.body_as_unicode())
         print(jsonresponse)
         print(jsonresponse['data']['stocks'])

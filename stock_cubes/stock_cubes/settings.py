@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for stock_combinations project
+# Scrapy settings for stock_cubes project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -9,19 +9,19 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'stock_combinations'
+BOT_NAME = 'stock_cubes'
 
-SPIDER_MODULES = ['stock_combinations.spiders']
-NEWSPIDER_MODULE = 'stock_combinations.spiders'
+SPIDER_MODULES = ['stock_cubes.spiders']
+NEWSPIDER_MODULE = 'stock_cubes.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'stock_combinations (+http://www.yourdomain.com)'
+#USER_AGENT = 'stock_cubes (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 ITEM_PIPELINES = {
-    'stock_combinations.pipelines.StockCombinationsPipeline': 300,
+    'stock_cubes.pipelines.StockCubesPipeline': 300,
 }
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
@@ -51,13 +51,13 @@ COOKIES_ENABLED = False
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'stock_combinations.middlewares.StockCombinationsSpiderMiddleware': 543,
+#    'stock_cubes.middlewares.StockCubesSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'stock_combinations.middlewares.RandomUserAgentMiddleware': 543,
+   'stock_cubes.middlewares.RandomUserAgentMiddleware': 543,
    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
 }
 RANDOM_UA_TYPE='random'
@@ -71,7 +71,7 @@ RANDOM_UA_TYPE='random'
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    'stock_combinations.pipelines.StockCombinationsPipeline': 300,
+#    'stock_cubes.pipelines.StockCubesPipeline': 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)

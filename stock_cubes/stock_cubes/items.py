@@ -8,7 +8,7 @@
 import scrapy
 
 
-class StockCombinationsItem(scrapy.Item):
+class StockCubesItem(scrapy.Item):
     name = scrapy.Field()
     symbol = scrapy.Field()
     market = scrapy.Field()
