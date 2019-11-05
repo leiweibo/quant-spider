@@ -16,41 +16,16 @@ class XueqiuSpider(scrapy.Spider):
 
     # dictionary to map UserItem fields to Jmes query paths
     jmes_paths = {
-        'id' : 'id',
         'name' : 'name',
-        'description' : 'description',
-        'active_flag' : 'active_flag',
-        'star' : 'star',
-        'market' : 'market',
-        'owner_id' : 'owner_id',
-        'create_at' : 'create_at',
-        'update_at' : 'update_at',
-        'last_rb_id' : 'last_rb_id',
+        'symbol': 'symbol',
+        'market': 'market',
+        'net_value' :'net_value',
         'daily_gain' : 'daily_gain',
-        'month_gain' : 'month_gain',
+        'monthly_gain': 'monthly_gain',
         'total_gain' : 'total_gain',
-        'net_value' : 'net_value',
-        'rank_percent' : 'rank_percent',
-        'annualized_gain_rate' : 'annualized_gain_rate',
-        'bb_rate' : 'bb_rate',
-        'follower_count' : 'follower_count',
-        'view_rebalancing' : 'view_rebalancing',
-        'last_reblanceing' : 'last_reblanceing',
-        'last_success_rebalance' : 'last_success_rebalance',
-        'tag' : 'tag',
-        'recomment_reason' : 'recomment_reason',
-        'sale_flag' : 'sale_flag',
-        'sell_flag' : 'sell_flag',
-        'commission' : 'commission',
-        'initial_capital' : 'initial_capital',
-        'listed_flag' : 'listed_flag',
-        'countractor_id' : 'countractor_id',
-        'last_user_rb_gid' : 'last_user_rb_gid',
-        'performance' : 'performance',
-        'closed_at' : 'closed_at',
-        'badge_exist' : 'badge_exist',
-        'rankingDate' : 'rankingDate',
-        'owner' : 'owner'
+        'annualized_gain': 'annualized_gain',
+        'closed_at' : 'closed_at', # 这个字段如果为空，则表示未关闭状态
+        'owner': 'owner'
     }
 
     owner_jmes_paths = {
@@ -111,6 +86,16 @@ class XueqiuSpider(scrapy.Spider):
 
             item['owner'] = owner
             yield item
+
+            # 开始提取用户信息 
+            # https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid=6626771620&pid=-24（创建的组合）
+            # https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid=6626771620&pid=-120 (关注的组合)
+            # 组合信息：
+            # https://xueqiu.com/cubes/quote.json?code=ZH976766,SP1034535,SP1012810,ZH1160206,ZH2003755,ZH1996976,ZH1079481,ZH1174824,ZH1079472,SP1040320
+            uid = owner['id']
+            createdCombinationUrl = f'https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid={uid}&pid=-24'
+            yield scrapy.Request(createdCombinationUrl, self.parseAuthorCreatedCombination, headers = self.send_headers)
+            
             
         
         page = jsonresponse['page']
@@ -120,3 +105,14 @@ class XueqiuSpider(scrapy.Spider):
         print('the url is: {self.url}, the headers: {self.headers}')
         yield scrapy.Request(self.url, headers = self.send_headers)
 
+    def parseAuthorCreatedCombination(self, response): 
+        jsonresponse = json.loads(response.body_as_unicode())
+        print(jsonresponse)
+        print(jsonresponse['data']['stocks'])
+        stockJson = jsonresponse['data']['stocks']
+        print('000000000000000000000000000000000000000000')
+        for s in stockJson:
+            print(s['symbol'])
+
+        print(",".join(str(s['symbol']) for s in stockJson))
+        pass
