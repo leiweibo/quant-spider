@@ -5,3 +5,7 @@
 
 关于json对象包含其他对象的，请参考：
 https://robustify.wordpress.com/2017/12/22/how-to-scrape-json-response-with-scrapy-using-the-selectjmes-processor/
+
+雪球组合接口：
+关注的人: https://xueqiu.com/friendships/groups/members.json?uid=6626771620&page=1&gid=0
+粉丝：https://xueqiu.com/friendships/followers.json?uid=6626771620&pageNo=1

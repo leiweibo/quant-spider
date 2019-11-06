@@ -34,8 +34,8 @@ class XueqiuSpider(scrapy.Spider):
     }
 
     def __init__(self):
-        crack = CrackXueqiu()
-        self.login_result = crack.crack()
+        # crack = CrackXueqiu()
+        # self.login_result = crack.crack()
         pass
     
 
@@ -88,13 +88,16 @@ class XueqiuSpider(scrapy.Spider):
             yield item
 
             # 开始提取用户信息 
+            uid = owner['id']
             # https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid=6626771620&pid=-24（创建的组合）
+            createdCubeUrl = f'https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid={uid}&pid=-24'
+            #  请求用户创建的组合
+            # 通过cb_kwargs的方式，给解析函数传递参数
+            yield scrapy.Request(createdCubeUrl, self.parseAuthorCreatedCube, headers = self.send_headers, cb_kwargs = dict(uid =uid, screen_name=owner['screen_name']))
+
             # https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid=6626771620&pid=-120 (关注的组合)
             # 组合信息：
             # https://xueqiu.com/cubes/quote.json?code=ZH976766,SP1034535,SP1012810,ZH1160206,ZH2003755,ZH1996976,ZH1079481,ZH1174824,ZH1079472,SP1040320
-            uid = owner['id']
-            createdCubeUrl = f'https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid={uid}&pid=-24'
-            yield scrapy.Request(createdCubeUrl, self.parseAuthorCreatedCube, headers = self.send_headers)
             
             
         
@@ -102,17 +105,35 @@ class XueqiuSpider(scrapy.Spider):
         maxPage = jsonresponse['maxPage']
         if (page < maxPage):
             self.url = f'https://xueqiu.com/cubes/discover/rank/cube/list.json?category=14&page={page+1}&count=20'
-        print('the url is: {self.url}, the headers: {self.headers}')
-        yield scrapy.Request(self.url, headers = self.send_headers)
+            print(f'the url is: {self.url}, the headers: {self.headers}')
+            yield scrapy.Request(self.url, headers = self.send_headers)
 
-    def parseAuthorCreatedCube(self, response): 
+    def parseAuthorCreatedCube(self, response, uid, screen_name): 
         jsonresponse = json.loads(response.body_as_unicode())
         print(jsonresponse)
         print(jsonresponse['data']['stocks'])
         stockJson = jsonresponse['data']['stocks']
-        print('000000000000000000000000000000000000000000')
-        for s in stockJson:
-            print(s['symbol'])
 
-        print(",".join(str(s['symbol']) for s in stockJson))
+        symbolListStr = (",".join(str(s['symbol']) for s in stockJson))
+        cubeInfoUrl = 'https://xueqiu.com/cubes/quote.json?code=' + symbolListStr
+        symbolList = symbolListStr.split(',')
+        yield scrapy.Request(cubeInfoUrl, self.parseCubeInfo, headers = self.send_headers, cb_kwargs = dict(uid =uid, screen_name=screen_name, symbolList = symbolList))
         pass
+
+    def parseCubeInfo(self, response, uid, screen_name, symbolList):
+        # print('the url is----->' + response.url +', the symbolList:' + symbolList)
+        jsonresponse = json.loads(response.body_as_unicode())
+        print(f'---------->{symbolList}')
+        for s in symbolList:
+            print(jsonresponse[s])
+            loader = ItemLoader(item = StockCubesItem())
+            loader.default_input_processor = MapCompose(str)
+            loader.default_output_processor = Join(' ')
+            for (field, path) in self.jmes_paths.items():
+                loader.add_value(field, SelectJmes(path)(jsonresponse[s]))
+            item = loader.load_item()
+            owner = OwnerItem()
+            owner['id'] = uid
+            owner['screen_name'] = screen_name
+            item['owner'] = owner
+            yield item
