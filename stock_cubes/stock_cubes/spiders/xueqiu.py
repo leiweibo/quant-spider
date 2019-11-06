@@ -13,6 +13,7 @@ class XueqiuSpider(scrapy.Spider):
     login_result = True
     cookiestr = ''
     send_headers = {}
+    cube_discover_url = 'https://xueqiu.com/cubes/discover/rank/cube/list.json?category=14&count=20&page='
 
     # dictionary to map UserItem fields to Jmes query paths
     jmes_paths = {
@@ -60,8 +61,8 @@ class XueqiuSpider(scrapy.Spider):
         # print(f'headers的内容是：{send_headers}')
         # print({cookiestr})
         currentPage = 1
-        url = f'https://xueqiu.com/cubes/discover/rank/cube/list.json?category=14&page={currentPage}&count=20'
-        yield scrapy.Request(url, headers = self.send_headers)
+        finalUrl = f'{self.cube_discover_url}{currentPage}'
+        yield scrapy.Request(finalUrl, headers = self.send_headers)
 
     def parse(self, response):
         jsonresponse = json.loads(response.body_as_unicode())
@@ -93,9 +94,12 @@ class XueqiuSpider(scrapy.Spider):
             createdCubeUrl = f'https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid={uid}&pid=-24'
             #  请求用户创建的组合
             # 通过cb_kwargs的方式，给解析函数传递参数
-            yield scrapy.Request(createdCubeUrl, self.parseAuthorCreatedCube, headers = self.send_headers, cb_kwargs = dict(uid =uid, screen_name=owner['screen_name']))
+            yield scrapy.Request(createdCubeUrl, self.parseCubeList, headers = self.send_headers, cb_kwargs = dict(uid =uid, screen_name=owner['screen_name']))
 
-            # https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid=6626771620&pid=-120 (关注的组合)
+            # 请求用户关注的组合
+            # followedCubeUrl = f'https://stock.xueqiu.com/v5/stock/portfolio/stock/list.json?size=1000&category=3&uid={uid}&pid=-120'
+            # yield scrapy.Request(followedCubeUrl, self.)
+            
             # 组合信息：
             # https://xueqiu.com/cubes/quote.json?code=ZH976766,SP1034535,SP1012810,ZH1160206,ZH2003755,ZH1996976,ZH1079481,ZH1174824,ZH1079472,SP1040320
             
@@ -103,12 +107,15 @@ class XueqiuSpider(scrapy.Spider):
         
         page = jsonresponse['page']
         maxPage = jsonresponse['maxPage']
+        maxPage = 2
         if (page < maxPage):
-            self.url = f'https://xueqiu.com/cubes/discover/rank/cube/list.json?category=14&page={page+1}&count=20'
-            print(f'the url is: {self.url}, the headers: {self.headers}')
-            yield scrapy.Request(self.url, headers = self.send_headers)
+            url = f'{self.cube_discover_url}{page+1}'
+            yield scrapy.Request(url, headers = self.send_headers)
 
-    def parseAuthorCreatedCube(self, response, uid, screen_name): 
+    #
+    # 通过去查找创建的组合以及组合的基本信息
+    #
+    def parseCubeList(self, response, uid, screen_name): 
         jsonresponse = json.loads(response.body_as_unicode())
         print(jsonresponse)
         print(jsonresponse['data']['stocks'])
