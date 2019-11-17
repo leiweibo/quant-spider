@@ -8,8 +8,16 @@ verify_ssl = true
 [packages]
 scrapy = "*"
 beautifulsoup4 = "*"
-taos = {path = "/home/weibolei/Dev/TDengine/src/connector/python/linux/python3"}
+# taos = {path = "/home/weibolei/Dev/TDengine/src/connector/python/linux/python3"}
 pandas = "*"
+datetime = "*"
+twisted = "*"
+time = "*"
+selenium = "*"
+pillow = "*"
+requests = "*"
+fake-useragent = "*"
+jmespath = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"

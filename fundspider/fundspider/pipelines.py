@@ -11,6 +11,7 @@ import datetime
 import logging
 
 from fundspider.items import FundspiderItem, FundNetValueItem
+from twisted.internet import defer, reactor
 class FundspiderPipelineByTDEngine(object):
     fund_data = []
     fund_net_value_data = []
@@ -32,8 +33,10 @@ class FundspiderPipelineByTDEngine(object):
     def process_item(self, item, spider):
         if isinstance(item, FundspiderItem):
             self._process_fund(item)
+            pass
         elif isinstance(item, FundNetValueItem):
             self._process_fund_net_value(item)
+            pass
         return item
 
     '''
@@ -41,16 +44,30 @@ class FundspiderPipelineByTDEngine(object):
     '''
     import taos
     import pandas as pd
+    @defer.inlineCallbacks
     def _save_data_to_Db(self, sql, cursor, values):
         values_str = ' '.join(str(e) for e in values)
         if (values_str):
             finalSql = sql + values_str
-            try:
-                self.cursor.execute(finalSql)
-                self.conn.commit()
-            except Exception as err:
-                print(err)
-                logging.error(f'exception: {finalSql}')
+            logging.info(f'execute sql--> {finalSql}')
+            out = defer.Deferred()
+            reactor.callInThread(self._insert, finalSql, out)
+            yield out
+            defer.returnValue(finalSql)
+            # try:
+            #     self.cursor.execute(finalSql)
+            #     if (commitDirectly):
+            #         self.conn.commit()
+            # except Exception as err:
+            #     print(err)
+            #     logging.error(f'exception: {finalSql}')
+
+    def _insert(self, finalSql, out):
+        try:
+            self.cursor.execute(finalSql)
+            reactor.callFromThread(out.callback, finalSql)
+        except Exception as err:
+            print(err)
 
     '''
     处理基金数据
@@ -66,8 +83,6 @@ class FundspiderPipelineByTDEngine(object):
             if (len(self.fund_data) >= self.batch_size):
                 self._save_data_to_Db(self.insert_fund_sql_prefix, self.cursor, self.fund_data)
                 self.fund_data.clear()
-
-
 
     '''
     处理资金净值数据
@@ -87,29 +102,32 @@ class FundspiderPipelineByTDEngine(object):
                 self.fund_net_value_data.clear()
 
 
+    # TODO: Save to redis
     def _save_to_cache(self, c_key, c_type):
-        value =  f"('{datetime.datetime.now()}', '{c_key}', '{c_type}')"
-        if (not self._check_if_data_exist(c_key, c_type)):
-            self.fund_cache_data.append(value)
-            if (len(self.fund_cache_data) >= self.batch_size):
-                self._save_data_to_Db(self.insert_cache_prefix, self.cursor, self.fund_cache_data)
-                self.fund_cache_data.clear()
+        # value =  f"('{datetime.datetime.now()}', '{c_key}', '{c_type}')"
+        # if (not self._check_if_data_exist(c_key, c_type)):
+        #     self.fund_cache_data.append(value)
+        #     if (len(self.fund_cache_data) >= self.batch_size):
+        #         self._save_data_to_Db(self.insert_cache_prefix, self.cursor, self.fund_cache_data)
+        #         self.fund_cache_data.clear()
+        pass
 
-    
+    ## TODO: Check in redis
     def _check_if_data_exist(self, c_key, c_type):
-        sql = f'select count(*) from t_cache where c_key = "{c_key}" and c_type = "{c_type}"'
-        result = False
-        try: 
-            self.cursor.execute(sql)
-            for c in self.cursor:
-                result = c[0] > 0
-                break
-            # logging.error(f'the check data exist sql: {sql}')
-            # logging.error(f'the check result is:{result}')
-            return result
-        except Exception  as e:
-            print('exception at check data if exists:' + str(e))
-            return False
+        return False
+        # sql = f'select count(*) from t_cache where c_key = "{c_key}" and c_type = "{c_type}"'
+        # result = False
+        # try:
+        #     self.cursor.execute(sql)
+        #     for c in self.cursor:
+        #         result = c[0] > 0
+        #         break
+        #     # logging.error(f'the check data exist sql: {sql}')
+        #     # logging.error(f'the check result is:{result}')
+        #     return result
+        # except Exception  as e:
+        #     print('exception at check data if exists:' + str(e))
+        #     return False
 
     def close_spider(self, spider):
         print('爬虫结束')
@@ -117,8 +135,10 @@ class FundspiderPipelineByTDEngine(object):
         self.fund_data.clear()
         self._save_data_to_Db(self.insert_fund_net_value_sql_prefix, self.cursor, self.fund_net_value_data)
         self.fund_net_value_data.clear()
-        self._save_data_to_Db(self.insert_cache_prefix, self.cursor, self.fund_cache_data)
+        self._save_data_to_Db(self.insert_cache_prefix, self.cursor, self.fund_cache_data, True)
         self.fund_cache_data.clear()
-
-        self.cursor.close()
-        self.conn.close()
+    
+        try: 
+            self.conn.close()
+        except Exception as e:
+            pass

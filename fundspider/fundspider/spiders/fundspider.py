@@ -19,22 +19,25 @@ class fundspider(scrapy.Spider):
     fund_count = 0
     def parse(self, response):
         rawResponse = response.text
-        # allpages = min(1, int(re.findall('allPages:(\d*)', rawResponse)[0])) #for test
+        # allpages =1 #for test
         allpages = re.findall('allPages:(\d*)', rawResponse)[0]
         currentPage = re.findall('pageIndex:(\d*)', rawResponse)[0]
         dataJsonReponse = re.findall('var rankData = {datas:(.*])', rawResponse)[0]
         jsonResponse = json.loads(dataJsonReponse)
+        print(f'len of fund is {len(jsonResponse)} in page: {currentPage}')
         for response in jsonResponse:
             self.fund_count += 1
-            logging.error('the fund count is:' + str(self.fund_count)) #for test
+            logging.info('the fund count is:' + str(self.fund_count)) #for test
             array = response.split(',')
             dt = datetime.now()
             targetFundNetValueUrl = f'http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code={array[0]}&sdate=2004-01-01&edate={dt.strftime("%Y-%m-%d")}&per=20&page=1'
             item = FundspiderItem(fund_symbol=array[0], name=array[1])
             yield item
+            logging.info(f'start to crawl: {targetFundNetValueUrl} @ {datetime.now()}')
             request = scrapy.Request(targetFundNetValueUrl, self.parseHistoryNetvalue)
             yield request
-
+            # if (self.fund_count >= 1):
+            #     break
         if (int(currentPage) < int(allpages)):
             targetFundListUrl = f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft={self.fundtype}&rs=&gs=0&sc=zzf&st=desc&pi={int(currentPage) + 1}&pn=1000&dx=1'
             print(f'最终的target: {targetFundListUrl}')
@@ -66,7 +69,7 @@ class fundspider(scrapy.Spider):
         else:
             self.fund_net_value_count_dict[fund_code] = fund_net_value_count
         #for test
-        logging.error('the fund net value count is:' + str(fund_code) + "--->" + str(self.fund_net_value_count_dict[fund_code]))
+        logging.info('the fund net value count is:' + str(fund_code) + "--->" + str(self.fund_net_value_count_dict[fund_code]))
         pages = int(re.findall('pages:(\d*)', rawResponse)[0])
         # pages = 1 # for test
         curpage = int(re.findall('curpage:(\d*)', rawResponse)[0])
