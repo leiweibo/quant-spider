@@ -26,7 +26,7 @@ class CrackXueqiu():
         self.chrome_options.add_argument('--headless')
         self.chrome_options.add_argument('--disable-gpu')
         self.chrome_options.add_experimental_option("detach", True)
-        self.browser = webdriver.Chrome(chrome_options = self.chrome_options)
+        self.browser = webdriver.Chrome(executable_path = './chromedriver', chrome_options = self.chrome_options)
         self.wait = WebDriverWait(self.browser, 20)
         self.email = EMAIL
         self.password = PASSWORD

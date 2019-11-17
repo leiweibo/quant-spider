@@ -7,3 +7,5 @@
 **/xueqiu_cookie.json
 **/.vscode
 **/.json
+**/chromedriver*
+cube.json
