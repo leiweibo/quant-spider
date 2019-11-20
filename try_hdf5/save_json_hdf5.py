@@ -124,35 +124,26 @@ def save_data():
     with h5py.File('cubeList.h5', 'a') as f:
         if not 'ZH1307218' in f:
             grp = f.create_group('ZH1307218')
-        else:
-            grp = f['ZH1307218']
-        
-        if not 'ZH1307218/cubeList' in f:
-            print('cube not existt')
-            grp.create_dataset('cubeList', data= json.dumps(cubeList))
+
+        metaData = None
+        if 'ZH1307218/cubeList' in f:
             metaData = json.loads(f['ZH1307218/cubeList'][()])
-            print(metaData)
+            print('load meta data')
         else:
-            print('cube exists')
-            grp = f['ZH1307218/cubeList']
-            ### 替换里面的数据
-            grp[...] = json.dumps(cubeList2)
-            metaData = json.loads(f['ZH1307218/cubeList'][()])
-            print(metaData)
-            # f['ZH1307218'].create_dataset('cubeList', data= json.dumps(cubeList))
-            # metaData = json.loads(f['ZH1307218/cubeList'][()])
-            # print(metaData)
-            
-        # grp.create_dataset('cubeList', data= json.dumps(cubeList))
-        # grp.create_dataset('rebalanceHisList', data = json.dumps(rebalanceHistoryList))
-        # grp.create_dataset('profitListHistory', data = json.dumps(profitList))
-        # grp.create_dataset('cubeList', data=md_data)
-        # print(grp)
-        # print(grp['cubeList'])
-        # print(grp['profitListHistory'])
-        # print(grp['rebalanceHisList'])
+            f['ZH1307218/cubeList'] = json.dumps(cubeList)
+            print('no meta data to load.')
+            metaData = cubeList
         
+        if metaData:
+            f['ZH1307218/cubeList'][()] = json.dumps(metaData + cubeList2)
+            print('meta data is not none.')
+        else:
+            f['ZH1307218/cubeList'][()] = json.dumps(cubeList2)
+            print('meta data is none.')
+
+        print(f['ZH1307218/cubeList'][()])
         f.close()
+        
 if __name__ == '__main__':
     print("Try to save json data into hdf5.")
     save_data()
