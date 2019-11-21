@@ -19,6 +19,7 @@ requests = "*"
 fake-useragent = "*"
 jmespath = "*"
 h5py = "*"
+tables = "*"
 
 [requires]
 python_version = "3.7"

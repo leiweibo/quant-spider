@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 import json
-
+### 参考 read_hdf5_json_pandas.py
 def save_data():
     '''
     组合列表数据
@@ -33,23 +33,13 @@ def save_data():
 
     cubeList2 = [
         {
-            "user":{
-                "id":2818639099,
-                "screen_name":"盛世有我88_2",
-                "photo_domain":"http://xavatar.imedao.com/",
-                "profile_image_url":"community/default/avatar.png,community/default/avatar.png!180x180.png,community/default/avatar.png!50x50.png,community/default/avatar.png!30x30.png"
-            },
+            "user":2818639099,
             "rate":1.1162,
             "symbol":"SP1008125",
             "name":"盛世有我88的实盘_2"
         },
         {
-            "user":{
-                "id":4669951570,
-                "screen_name":"TotemlessOne_2",
-                "photo_domain":"http://xavatar.imedao.com/",
-                "profile_image_url":"community/20151/1424586996452-1424586996593.jpeg,community/20151/1424586996452-1424586996593.jpeg!180x180.png,community/20151/1424586996452-1424586996593.jpeg!50x50.png,community/20151/1424586996452-1424586996593.jpeg!30x30.png"
-            },
+            "user": 4669951570,
             "rate":0.7667,
             "symbol":"SP1036843",
             "name":"Totemless_的实盘_2"
