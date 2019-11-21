@@ -37,12 +37,16 @@ def save_data_via_pandas():
             "name":"Totemless_的实盘_2"
         }
     ]
-
-    dfItem = pd.DataFrame.from_records(cubeList)
-    dfItem.to_hdf('pd_json_data.h5', format='table', key = 'cube_list', mode='a', min_itemsize={'name' : 30})
-    dfItem = pd.DataFrame.from_records(cubeList2)
-    dfItem.to_hdf('pd_json_data.h5', format='table', key = 'cube_list', mode='a', append=True, min_itemsize={'name' : 30})
-    print(type(pd.read_hdf('pd_json_data.h5', key = 'cube_list'))) # type: dateframe
+    for i in range(0, 100000):
+        dfItem = pd.DataFrame.from_records(cubeList)
+        dfItem.to_hdf('pd_json_data.h5', format='table', key = 'cube_list', mode='a', append=True, min_itemsize={'name' : 30})
+        dfItem = pd.DataFrame.from_records(cubeList2)
+        dfItem.to_hdf('pd_json_data.h5', format='table', key = 'cube_list', mode='a', append=True, min_itemsize={'name' : 30})
+    
+    print('Fetch type:  ---->')
+    print(pd.read_hdf('pd_json_data.h5', key = 'cube_list')) # type: dateframe
+    print('Query data:  ---->')
+    print(pd.read_hdf('pd_json_data.h5', key = 'cube_list').query('user == 4669951570')) # type: dateframe
 
     # store = pd.HDFStore('pd_json_data.h5', mode = 'w')
     # dfItem = pd.DataFrame.from_records(cubeList)
