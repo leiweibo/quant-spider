@@ -1,12 +1,15 @@
 [[source]]
 name = "pypi"
-url = "https://mirrors.aliyun.com/pypi/simple/"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 verify_ssl = true
 
 [dev-packages]
 
 [packages]
 scrapy = "*"
+
+[requires]
+python_version = "3.7"
 beautifulsoup4 = "*"
 # taos = {path = "/home/weibolei/Dev/TDengine/src/connector/python/linux/python3"}
 pandas = "*"
@@ -20,6 +23,3 @@ fake-useragent = "*"
 jmespath = "*"
 h5py = "*"
 tables = "*"
-
-[requires]
-python_version = "3.7"
