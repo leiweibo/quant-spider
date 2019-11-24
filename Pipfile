@@ -7,15 +7,11 @@ verify_ssl = true
 
 [packages]
 scrapy = "*"
-
-[requires]
-python_version = "3.7"
 beautifulsoup4 = "*"
 # taos = {path = "/home/weibolei/Dev/TDengine/src/connector/python/linux/python3"}
 pandas = "*"
 datetime = "*"
 twisted = "*"
-time = "*"
 selenium = "*"
 pillow = "*"
 requests = "*"
@@ -23,3 +19,7 @@ fake-useragent = "*"
 jmespath = "*"
 h5py = "*"
 tables = "*"
+redis = "*"
+
+[requires]
+python_version = "3.*"

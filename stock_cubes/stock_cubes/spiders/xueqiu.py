@@ -6,6 +6,7 @@ from scrapy.loader import ItemLoader
 from stock_cubes.items import StockCubesItem, OwnerItem
 from scrapy.loader.processors import Join, MapCompose, SelectJmes
 from bs4 import BeautifulSoup
+import redis
 
 class XueqiuSpider(scrapy.Spider):
     name = 'xueqiu'
@@ -16,7 +17,7 @@ class XueqiuSpider(scrapy.Spider):
     send_headers = {}
     cube_discover_url = 'https://xueqiu.com/cubes/discover/rank/cube/list.json?category=14&count=20&page='
     cube_info_url = 'https://xueqiu.com/P/'
-
+    r = redis.Redis(host='localhost', password = '123456')
     # dictionary to map UserItem fields to Jmes query paths
     jmes_paths = {
         'name' : 'name',
@@ -37,8 +38,8 @@ class XueqiuSpider(scrapy.Spider):
     }
 
     def __init__(self):
-        crack = CrackXueqiu()
-        self.login_result = crack.crack()
+        # crack = CrackXueqiu()
+        # self.login_result = crack.crack()
         pass
     
 
@@ -54,11 +55,12 @@ class XueqiuSpider(scrapy.Spider):
         self.cookiestr = '; '.join(item for item in cookie)
         print(f'从文件中读取的cookie: {self.cookiestr}')
         cube_adjust_url = 'https://xueqiu.com/cubes/rebalancing/history.json?cube_symbol=ZH010389&count=20&page=1'
-        url = "https://httpbin.org/get?show_env=1"
         self.send_headers={
             'cookie': self.cookiestr,
             # 'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36'
         }
+
+        pass
 
         # print(f'headers的内容是：{send_headers}')
         # print({cookiestr})
@@ -136,7 +138,6 @@ class XueqiuSpider(scrapy.Spider):
         soup = BeautifulSoup(response.text, 'html.parser')
         uid = soup.find("a", {"class": "creator"})['href'][1:]
         screen_name = soup.find("div", {"class":"name"}).text
-        print('screen_name ------> ' + screen_name)
         symbolList = [symbol]
         cubeInfoUrl = 'https://xueqiu.com/cubes/quote.json?code=' + symbol
         yield scrapy.Request(cubeInfoUrl, self.parseCubeInfo, headers = self.send_headers, cb_kwargs = dict(uid =uid, screen_name=screen_name, symbolList = symbolList))
@@ -144,7 +145,6 @@ class XueqiuSpider(scrapy.Spider):
     def parseCubeInfo(self, response, uid, screen_name, symbolList):
         jsonresponse = json.loads(response.body_as_unicode())
         for s in symbolList:
-            print(jsonresponse[s])
             loader = ItemLoader(item = StockCubesItem())
             loader.default_input_processor = MapCompose(str)
             loader.default_output_processor = Join(' ')

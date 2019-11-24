@@ -8,5 +8,5 @@
 **/.vscode
 **/.json
 **/chromedriver*
-cube.json
+**/cube.json
 **/*.h5
