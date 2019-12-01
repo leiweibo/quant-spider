@@ -37,7 +37,7 @@ def save_data_via_pandas():
             "name":"Totemless_的实盘_2"
         }
     ]
-    for i in range(0, 100000):
+    for i in range(0, 10):
         dfItem = pd.DataFrame.from_records(cubeList)
         dfItem.to_hdf('pd_json_data.h5', format='table', key = 'cube_list', mode='a', append=True, min_itemsize={'name' : 30})
         dfItem = pd.DataFrame.from_records(cubeList2)

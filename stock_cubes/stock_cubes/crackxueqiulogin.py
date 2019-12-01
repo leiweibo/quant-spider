@@ -23,8 +23,8 @@ class CrackXueqiu():
         self.chrome_options = webdriver.ChromeOptions()
         self.chrome_options.add_argument('--window-size=1920,1080')
         self.chrome_options.add_argument('--start-maximized')
-        self.chrome_options.add_argument('--headless')
-        self.chrome_options.add_argument('--disable-gpu')
+        # self.chrome_options.add_argument('--headless')
+        # self.chrome_options.add_argument('--disable-gpu')
         self.chrome_options.add_experimental_option("detach", True)
         self.browser = webdriver.Chrome(executable_path = './chromedriver', chrome_options = self.chrome_options)
         self.wait = WebDriverWait(self.browser, 20)
@@ -118,10 +118,10 @@ class CrackXueqiu():
         while current < distance:
             if current < mid:
                 # 加速度为正2
-                a = 10
+                a = 2
             else:
                 # 加速度为负3
-                a = -7
+                a = -3
             # 初速度v0
             v0 = v
             # 当前速度v = v0 + at
@@ -194,7 +194,7 @@ class CrackXueqiu():
 
             # 失败之后，继续第二次校验，最多校验3次
             if self.retried_cnt < self.max_retry_cnt:
-                self.crack(False)
+                self.crack(True)
                 self.retried_cnt += 1
             else:
                 return False
