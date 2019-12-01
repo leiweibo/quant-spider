@@ -97,25 +97,30 @@ class XueqiuSpider(scrapy.Spider):
         symbol = jsonresponse[0]['symbol']
         
         h5name = f"cube_info_{symbol}.h5"
-        
-        self.hdf5.save_data_via_pandas(h5Name = h5name, key = "profit_list", dataList = str(jsonresponse[0]['list']))
+        self.hdf5.save_data_via_pandas(h5Name = h5name, key = "profit_list", dataList = jsonresponse[0]['list'])
 
     def parseCubeRebalanceList(self, response, symbol):
         jsonresponse = json.loads(response.body_as_unicode())
         print('type of the result is2:' + str(len(jsonresponse)))
         page = jsonresponse['page']
         maxPage = jsonresponse['maxPage']
+
         print(f'------------进行第{page}数据爬取')
-        if page == 1:
-            print(jsonresponse['list'])
+
         if page < maxPage:
             page += 1
+            self.cube_rebalce_url = f"https://xueqiu.com/cubes/rebalancing/history.json?count=20&page={page}&cube_symbol={symbol}"
+            print(self.cube_rebalce_url)
+            yield scrapy.Request(self.cube_rebalce_url, self.parseCubeRebalanceList, headers = self.send_headers, cb_kwargs=dict(symbol = symbol))
         
-        self.cube_rebalce_url = f"https://xueqiu.com/cubes/rebalancing/history.json?count=20&page={page}&cube_symbol={symbol}"
-        print(self.cube_rebalce_url)
-        yield scrapy.Request(self.cube_rebalce_url, self.parseCubeRebalanceList, headers = self.send_headers, cb_kwargs=dict(symbol = symbol))
         h5name = f"cube_info_{symbol}.h5"
-        self.hdf5.save_data_via_pandas(h5Name = h5name, key = "rebalance_list", dataList = str(jsonresponse['list']))
+        
+        dataList = []
+        self.hdf5.save_data_via_pandas(h5Name = h5name, key = "rebalance_list", dataList = jsonresponse['list'], exclude = ['rebalancing_histories'])
+        for history in jsonresponse['list']:
+            dataList += history['rebalancing_histories']
+        if len(dataList) > 0:
+            self.hdf5.save_data_via_pandas(h5Name = h5name, key = "rebalancing_histories", dataList = dataList, fillna = True)
         
 
     def parse(self, response):

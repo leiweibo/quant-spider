@@ -37,16 +37,22 @@ def save_data_via_pandas():
             "name":"Totemless_的实盘_2"
         }
     ]
-    for i in range(0, 10):
-        dfItem = pd.DataFrame.from_records(cubeList)
-        dfItem.to_hdf('pd_json_data.h5', format='table', key = 'cube_list', mode='a', append=True, min_itemsize={'name' : 30})
-        dfItem = pd.DataFrame.from_records(cubeList2)
-        dfItem.to_hdf('pd_json_data.h5', format='table', key = 'cube_list', mode='a', append=True, min_itemsize={'name' : 30})
+
+    print(cubeList)
+    # for i in range(0, 10):
+    #     dfItem = pd.DataFrame.from_records(cubeList)
+    #     dfItem.to_hdf('pd_json_data.h5', format='table', key = 'cube_list', mode='a', append=True, min_itemsize={'name' : 30})
+    #     dfItem = pd.DataFrame.from_records(cubeList2)
+    #     dfItem.to_hdf('pd_json_data.h5', format='table', key = 'cube_list', mode='a', append=True, min_itemsize={'name' : 30})
     
     print('Fetch type:  ---->')
-    print(pd.read_hdf('pd_json_data.h5', key = 'cube_list')) # type: dateframe
-    print('Query data:  ---->')
-    print(pd.read_hdf('pd_json_data.h5', key = 'cube_list').query('user == 4669951570')) # type: dateframe
+    print(pd.read_hdf('../stock_cubes/cube_info_ZH009248.h5', key = 'rebalance_list')) # type: dateframe
+    # print(pd.read_hdf('../stock_cubes/cube_info_ZH009248.h5', key = 'rebalancing_histories')) # type: dateframe
+    # print(pd.read_hdf('../stock_cubes/cube_info_ZH009248.h5', key = 'profit_list')) # type: dateframe    # print('Query data:  ---->')
+    # print(pd.read_hdf('../stock_cubes/cube_info_ZH009248.h5', key = 'rebalancing_histories').query('rebalancing_id == 63375722'))
+    # print(pd.read_hdf('../stock_cubes/cube_info_ZH009248.h5', key = 'profit_list').query('time == 1540483200000'))
+    # print(pd.read_hdf('../stock_cubes/cube_info_ZH009248.h5', key = 'rebalance_list').query('stock_symbol == SZ300078'))
+    # print(pd.read_hdf('cube_info_ZH009248.h5', key = 'rebalance_list').query('user == 4669951570')) # type: dateframe
 
     # store = pd.HDFStore('pd_json_data.h5', mode = 'w')
     # dfItem = pd.DataFrame.from_records(cubeList)
