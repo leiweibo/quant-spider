@@ -26,7 +26,7 @@ class CrackXueqiu():
         # self.chrome_options.add_argument('--headless')
         # self.chrome_options.add_argument('--disable-gpu')
         self.chrome_options.add_experimental_option("detach", True)
-        self.browser = webdriver.Chrome(executable_path = './chromedriver', chrome_options = self.chrome_options)
+        self.browser = webdriver.Chrome(executable_path = 'chromedriver', chrome_options = self.chrome_options)
         self.wait = WebDriverWait(self.browser, 20)
         self.email = EMAIL
         self.password = PASSWORD
@@ -140,7 +140,29 @@ class CrackXueqiu():
         track[len(track) - 1] -= (total_distance - distance)
         print(track)
         return track
-
+    
+    import math
+    def ease_out_quad(self, x):
+        return 1 - (1 - x) * (1 - x)
+ 
+    def ease_out_quart(self, x):
+        return 1 - pow(1 - x, 4)
+    
+    def ease_out_expo(self, x):
+        if x == 1:
+            return 1
+        else:
+            return 1 - pow(2, -10 * x)
+    
+    def get_tracks(self, distance, seconds, ease_func):
+        tracks = [0]
+        offsets = [0]
+        for t in np.arange(0.0, seconds, 0.1):
+            ease = getattr(self, ease_func)
+            offset = round(ease(t/seconds) * distance)
+            tracks.append(offset - offsets[-1])
+            offsets.append(offset)
+        return offsets, tracks
 
     """
     拖动滑块到缺口处
@@ -148,12 +170,14 @@ class CrackXueqiu():
     :param track: 轨迹
     :return:
     """
+    import time;
     def start_to_move(self, track):
         slider = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'geetest_slider_button')))
         ActionChains(self.browser).click_and_hold(slider).perform()
         for x in track:
+            print(f'-----------------------> time start at {time.asctime( time.localtime(time.time()) )}')
             ActionChains(self.browser).move_by_offset(xoffset=x, yoffset=0).perform()
-            time.sleep(0.1)
+            print(f'-----------------------> time end at {time.asctime( time.localtime(time.time()) )}')
         ActionChains(self.browser).release().perform()
 
 
@@ -173,8 +197,11 @@ class CrackXueqiu():
         # print('need move move_distance:' + str(move_distance))
 
         move_distance -= BORDER
+        print(f'------------------------------->{str(move_distance)}')
         # 获取轨迹
-        track = self.get_track(move_distance)
+        # track = self.get_track(move_distance)
+        offset, track = self.get_tracks(move_distance, 3, 'ease_out_quad')
+        print('-------------------------------->' + str(track))
         # 开始移动
         self.start_to_move(track)
 
