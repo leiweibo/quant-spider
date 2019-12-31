@@ -48,8 +48,8 @@ class XueqiuSpider(scrapy.Spider):
     }
 
     def __init__(self):
-        # crack = CrackXueqiu()
-        # self.login_result = crack.crack()
+        crack = CrackXueqiu()
+        self.login_result = crack.crack()
         pass
     
 
